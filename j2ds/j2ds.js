@@ -20,10 +20,16 @@ var j2ds = {
 
 j2ds.Math = {
   vec2df: function (_x, _y) {
-    return ({x: _x, y: _y});
+    return {
+      x: _x,
+      y: _y
+    };
   },
   vec2di: function (_x, _y) {
-    return {x: (_x >> 0), y: (_y >> 0)};
+    return {
+      x: _x >> 0,
+      y: _y >> 0
+    };
   },
   random: function (min, max) {
     return Math.ceil(Math.random() * (max - min) + min);
@@ -50,7 +56,7 @@ j2ds.start = function (_engine, _frameLimit) {
   });
   j2ds.frameLimit = _frameLimit || 60;
   j2ds.sceneSkipTime = 1000.0 / j2ds.frameLimit;
-  j2ds.nextJ2dsGameStep(j2ds.gameEngine);
+  nextJ2dsGameStep(j2ds.gameEngine);
 };
 
 // установка активного игрового состояния
@@ -70,10 +76,10 @@ j2ds.gameEngine = function () {
     j2ds.input.keyUp = [];
     j2ds.lastTime = j2ds.now;
   }
-  j2ds.nextJ2dsGameStep(j2ds.gameEngine);
+  nextJ2dsGameStep(j2ds.gameEngine);
 };
 
-j2ds.nextJ2dsGameStep = (function () {
+var nextJ2dsGameStep = (function () {
   return j2ds.window.requestAnimationFrame ||
     j2ds.window.webkitRequestAnimationFrame ||
     j2ds.window.mozRequestAnimationFrame ||
@@ -82,7 +88,7 @@ j2ds.nextJ2dsGameStep = (function () {
     function (callback) {
       j2ds.window.setTimeout(callback, 1000 / j2ds.frameLimit);
     };
-})();
+}());
 
 
 /*----------------- INPUT -------------------*/
@@ -172,7 +178,19 @@ j2ds.input.jKey = {
   NUM_9: 33,
   NUM_MINUS: 109,
   NUM_PLUS: 107,
-  NUM_LK: 144
+  NUM_LK: 144,
+  F1: 112,
+  F2: 113,
+  F3: 114,
+  F4: 115,
+  F5: 116,
+  F6: 117,
+  F7: 118,
+  F8: 119,
+  F9: 120,
+  F10: 121,
+  F11: 122,
+  F12: 123
 };
 
 j2ds.input.isKeyDown = function (_code) {
