@@ -1,86 +1,60 @@
 'use strict';
 
-/*----------- DOM ---------------*/
-var $ = function (id) {
-  return document.getElementById(id);
-};
-
-
-/*------------------- Математика --------------*/
-var vec2df = function (_x, _y) {
-  return ({x: _x, y: _y});
-};
-
-var vec2di = function (_x, _y) {
-  return {x: (_x >> 0), y: (_y >> 0)};
-};
-
-var random = function (min, max) {
-  return Math.ceil(Math.random() * (max - min) + min);
-};
-
-var rad = function (_num) {
-  return _num * (Math.PI / 180);
-};
-
-
 /*------------------ 2D движок --------------------*/
 var j2ds = {
+  $: function (selector) {
+    return document.querySelector(selector);
+  },
   now: 0,
   dt: 0,
-  framelimit: 60,
+  frameLimit: 60,
   sceneStartTime: 0,
   sceneSkipTime: 0,
   FDT: 0,
   engine: false,
-  redy: false,
-  scripts: {},
+  ready: false,
   root: 'j2ds/',
   countDrawNodes: 0,
   window: window
 };
 
+j2ds.Math = {
+  vec2df: function (_x, _y) {
+    return ({x: _x, y: _y});
+  },
+  vec2di: function (_x, _y) {
+    return {x: (_x >> 0), y: (_y >> 0)};
+  },
+  random: function (min, max) {
+    return Math.ceil(Math.random() * (max - min) + min);
+  },
+  rad: function (_num) {
+    return _num * (Math.PI / 180);
+  }
+};
+
 /* функции */
 
 j2ds.device = function () {
-  var o = {};
-  o.width = (parseInt(document.documentElement.clientWidth) < parseInt(screen.width)) ? parseInt(document.documentElement.clientWidth) : parseInt(screen.width);
-  o.height = (parseInt(document.documentElement.clientHeight) < parseInt(screen.height)) ? parseInt(document.documentElement.clientHeight) : parseInt(screen.height);
-  return (o);
-};
-
-j2ds.loaded = function (_id) {
-  j2ds.scripts[_id] = true;
-};
-
-j2ds.include = function (_path) {
-  var _id = _path.replace(/\//g, '');
-  if (j2ds.scripts[_id]) {
-    return 0;
+  return {
+    width: (parseInt(document.documentElement.clientWidth) < parseInt(screen.width)) ? parseInt(document.documentElement.clientWidth) : parseInt(screen.width),
+    height: (parseInt(document.documentElement.clientHeight) < parseInt(screen.height)) ? parseInt(document.documentElement.clientHeight) : parseInt(screen.height)
   }
-
-  var reader = new XMLHttpRequest();
-  reader.open('GET', j2ds.root + _path + '.js', false);
-  reader.send(null);
-  var sourceCode = reader.responseText;
-
-  j2ds.loaded(_id);
-
-  eval(sourceCode);
 };
 
 // старт игры
-j2ds.start = function (_engine, _framelimit) {
-  j2ds.engine = _engine || function () {
-      document.body.innerHTML = 'Пожалуйста, инициализируйте игровую функцию!';
-    };
-  j2ds.framelimit = _framelimit || 60;
-  j2ds.sceneSkipTime = 1000.0 / j2ds.framelimit;
-  nextJ2dsGameStep(j2ds.gameEngine);
+j2ds.start = function (_engine, _frameLimit) {
+  j2ds.setActiveEngine(_engine || function () {
+    //document.body.innerHTML = 'Пожалуйста, инициализируйте игровую функцию!';
+    throw new Error('Пожалуйста, инициализируйте игровую функцию!');
+  });
+  j2ds.frameLimit = _frameLimit || 60;
+  j2ds.sceneSkipTime = 1000.0 / j2ds.frameLimit;
+  j2ds.nextJ2dsGameStep(j2ds.gameEngine);
 };
 
 // установка активного игрового состояния
-j2ds.setActivEngine = function (_engine) {
+j2ds.setActiveEngine = function (_engine) {
   j2ds.engine = _engine;
 };
 
@@ -96,17 +70,17 @@ j2ds.gameEngine = function () {
     j2ds.input.keyUp = [];
     j2ds.lastTime = j2ds.now;
   }
-  nextJ2dsGameStep(j2ds.gameEngine);
+  j2ds.nextJ2dsGameStep(j2ds.gameEngine);
 };
 
-var nextJ2dsGameStep = (function () {
-  return window.requestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.mozRequestAnimationFrame ||
-    window.oRequestAnimationFrame ||
-    window.msRequestAnimationFrame ||
+j2ds.nextJ2dsGameStep = (function () {
+  return j2ds.window.requestAnimationFrame ||
+    j2ds.window.webkitRequestAnimationFrame ||
+    j2ds.window.mozRequestAnimationFrame ||
+    j2ds.window.oRequestAnimationFrame ||
+    j2ds.window.msRequestAnimationFrame ||
     function (callback) {
-      window.setTimeout(callback, 1000 / j2ds.framelimit);
+      j2ds.window.setTimeout(callback, 1000 / j2ds.frameLimit);
     };
 })();
 
@@ -126,7 +100,7 @@ j2ds.input = {
   keyPress: [],
   keyPressed: [],
   keyUp: [],
-  keyUped: false,
+  keyUpped: false,
   canceled: false,
   body: false,
   anyKey: false
@@ -135,31 +109,87 @@ j2ds.input = {
 // Константы клавиш
 
 j2ds.input.jKey = {
-  'LEFT': 37,
-  'RIGHT': 39,
-  'UP': 38,
-  'DOWN': 40,
-  'SPACE': 32,
-  'CTRL': 17,
-
-  'ESC': 27
+  LEFT: 37,
+  RIGHT: 39,
+  UP: 38,
+  DOWN: 40,
+  SPACE: 32,
+  CTRL: 17,
+  SHIFT: 16,
+  ALT: 18,
+  ESC: 27,
+  ENTER: 13,
+  MINUS: 189,
+  PLUS: 187,
+  CAPS_LOCK: 20,
+  BACKSPACE: 8,
+  TAB: 9,
+  Q: 81,
+  W: 87,
+  E: 69,
+  R: 82,
+  T: 84,
+  Y: 89,
+  U: 85,
+  I: 73,
+  O: 79,
+  P: 80,
+  A: 65,
+  S: 83,
+  D: 68,
+  F: 70,
+  G: 71,
+  H: 72,
+  J: 74,
+  K: 75,
+  L: 76,
+  Z: 90,
+  X: 88,
+  C: 67,
+  V: 86,
+  B: 66,
+  N: 78,
+  M: 77,
+  D0: 48,
+  D1: 49,
+  D2: 50,
+  D3: 51,
+  D4: 52,
+  D5: 53,
+  D6: 54,
+  D7: 55,
+  D8: 56,
+  D9: 57,
+  NUM_0: 45,
+  NUM_1: 35,
+  NUM_2: 40,
+  NUM_3: 34,
+  NUM_4: 37,
+  NUM_5: 12,
+  NUM_6: 39,
+  NUM_7: 36,
+  NUM_8: 38,
+  NUM_9: 33,
+  NUM_MINUS: 109,
+  NUM_PLUS: 107,
+  NUM_LK: 144
 };
 
 j2ds.input.isKeyDown = function (_code) {
-  return (this.keyDown[this.jKey[_code]]);
+  return this.keyDown[this.jKey[_code]];
 };
 
 j2ds.input.isKeyPress = function (_code) {
-  return (this.keyPress[this.jKey[_code]]);
+  return this.keyPress[this.jKey[_code]];
 };
 
 j2ds.input.isKeyUp = function (_code) {
-  return (this.keyUp[this.jKey[_code]]);
+  return this.keyUp[this.jKey[_code]];
 };
 
 
 j2ds.input.getPosition = function () {
-  return (vec2df(this.pos.x, this.pos.y));
+  return j2ds.Math.vec2df(this.pos.x, this.pos.y);
 };
 
 
@@ -167,17 +197,19 @@ j2ds.input.keyEvent = function (e) {
   if ((e.type == 'keydown') && !j2ds.input.keyPressed[e.keyCode]) {
     j2ds.input.keyPress[e.keyCode] = true;
     j2ds.input.keyPressed[e.keyCode] = true;
-  } else if ((e.type == 'keyup') && j2ds.input.keyPressed[e.keyCode]) {
+  }
+  if ((e.type == 'keyup') && j2ds.input.keyPressed[e.keyCode]) {
     j2ds.input.keyPress[e.keyCode] = false;
     j2ds.input.keyPressed[e.keyCode] = false;
     j2ds.input.keyUp[e.keyCode] = true;
-    j2ds.input.keyUped = true;
+    j2ds.input.keyUpped = true;
   }
 
   j2ds.input.keyDown[e.keyCode] = (e.type == 'keydown') && (!j2ds.input.canceled);
 
   j2ds.input.anyKey = e.keyCode;
-  return (false);
+
+  return false;
 };
 
 //! системная
@@ -196,8 +228,8 @@ j2ds.input.cancel = function (_id) {
 //! системная
 // Вернет true, если мышь назодится над объектом
 j2ds.input.onNode = function (_id) {
-  return ( (this.pos.x > _id.pos.x && this.pos.x < _id.pos.x + _id.size.x) &&
-  (this.pos.y > _id.pos.y && this.pos.y < _id.pos.y + _id.size.y) );
+  return (this.pos.x > _id.pos.x && this.pos.x < _id.pos.x + _id.size.x) &&
+    (this.pos.y > _id.pos.y && this.pos.y < _id.pos.y + _id.size.y);
 };
 
 j2ds.input.upd = function () {
@@ -238,9 +270,9 @@ j2ds.input.onClick = function (e) {
       e.which = 3;
     }
   }
-  j2ds.input.lClick = (e.which == 1 ? true : false) && (!j2ds.input.canceled);
-  j2ds.input.mClick = (e.which == 2 ? true : false) && (!j2ds.input.canceled);
-  j2ds.input.rClick = (e.which == 3 ? true : false) && (!j2ds.input.canceled);
+  j2ds.input.lClick = (e.which == 1) && (!j2ds.input.canceled);
+  j2ds.input.mClick = (e.which == 2) && (!j2ds.input.canceled);
+  j2ds.input.rClick = (e.which == 3) && (!j2ds.input.canceled);
   j2ds.window.focus();
   return false;
 };
@@ -249,16 +281,17 @@ j2ds.input.onTouch = function (e) {
   e.preventDefault();
   j2ds.input.abs.x = e.touches[0].pageX;
   j2ds.input.abs.y = e.touches[0].pageY;
-  j2ds.input.lClick = true && (!j2ds.input.canceled);
-  j2ds.input.touch = true && (!j2ds.input.canceled);
+  j2ds.input.lClick = !j2ds.input.canceled;
+  j2ds.input.touch = !j2ds.input.canceled;
   j2ds.window.focus();
+
   return false;
 };
 
 j2ds.input.falseInput = function () {
-  j2ds.input.lClick =
-    j2ds.input.mClick =
-      j2ds.input.rClick = false;
+  j2ds.input.lClick = false;
+  j2ds.input.mClick = false;
+  j2ds.input.rClick = false;
 };
 
 
@@ -271,15 +304,15 @@ j2ds.input.init = function () {
     j2ds.input.falseInput();
   };
   j2ds.window.oncontextmenu = function () {
-    return (false);
-  }
+    return false;
+  };
   j2ds.window.onselectstart = j2ds.window.oncontextmenu;
   j2ds.window.ondragstart = j2ds.window.oncontextmenu;
   j2ds.window.onmousedown = j2ds.input.onClick;
   j2ds.window.onmouseup = function () {
     j2ds.input.canceled = false;
     j2ds.input.falseInput();
-  }
+  };
   j2ds.window.onmousemove = j2ds.input.cursorPosition;
   j2ds.window.onkeydown = j2ds.input.keyEvent;
   j2ds.window.onkeyup = function (e) {
@@ -296,7 +329,7 @@ j2ds.layers.list = {};
 
 j2ds.layers.layer = function (_id) {
   return j2ds.layers.list[_id];
-}
+};
 
 j2ds.layers.add = function (_id, _index) {
   var o = {};
@@ -335,7 +368,7 @@ j2ds.layers.add = function (_id, _index) {
   };
 
   o.getPosition = function () {
-    return vec2di(parseInt(this.canvas.style.left), parseInt(this.canvas.style.top));
+    return j2ds.Math.vec2di(parseInt(this.canvas.style.left), parseInt(this.canvas.style.top));
   };
 
   o.drawText = function (_pos, _text, _color) {
@@ -372,8 +405,8 @@ j2ds.layers.add = function (_id, _index) {
     this.context.clearRect(_pos.x - j2ds.scene.view.x, _pos.y - j2ds.scene.view.y, _size.x, _size.y);
   };
 
-  j2ds.layers.list[_id] = (o);
-}
+  j2ds.layers.list[_id] = o;
+};
 
 
 /* сцена */
@@ -388,26 +421,26 @@ j2ds.scene.layers = j2ds.layers;
 
 
 j2ds.scene.setEngine = function (_engine) {
-  j2ds.setActivEngine(_engine);
+  j2ds.setActiveEngine(_engine);
 };
 
-j2ds.scene.start = function (_engine, _framelimit, _func) {
+j2ds.scene.start = function (_engine, _frameLimit, _func) {
   j2ds.window.onload = function () {
     for (var i in j2ds.layers.list) {
       document.body.appendChild(j2ds.layers.layer(i).canvas);
     }
     j2ds.input.init();
-    j2ds.start(_engine, _framelimit);
+    j2ds.start(_engine, _frameLimit);
     if (_func) {
       _func();
     }
-    ;
   }
 };
 
 j2ds.scene.fullScreen = function (_true) {
+  var layer;
   if (_true) {
-    var layer = j2ds.scene.canvas;
+    layer = j2ds.scene.canvas;
     layer.style.width = j2ds.device().width + 'px';
     layer.style.height = j2ds.device().height + 'px';
     for (var i in j2ds.layers.list) {
@@ -416,7 +449,7 @@ j2ds.scene.fullScreen = function (_true) {
       layer.style.height = j2ds.device().height + 'px';
     }
   } else {
-    var layer = j2ds.scene.canvas;
+    layer = j2ds.scene.canvas;
     layer.style.width = j2ds.scene.width + 1 + 'px';
     layer.style.height = j2ds.scene.height + 1 + 'px';
     for (var i in j2ds.layers.list) {
@@ -491,7 +524,7 @@ j2ds.scene.viewMove = function (_pos) {
 };
 
 //! Очистка отрисованного предыдущего кадра сцены
-j2ds.scene.clear = function (_color) {
+j2ds.scene.clear = function () {
   if (!j2ds.scene.cancelClear) {
     j2ds.scene.context.clearRect(0, 0, j2ds.scene.width, j2ds.scene.width);
     j2ds.scene.cancelClear = false;
@@ -500,7 +533,7 @@ j2ds.scene.clear = function (_color) {
 
 // инициализация сцены
 j2ds.scene.init = function (_canvas, _color) {
-  j2ds.scene.canvas = $(_canvas);
+  j2ds.scene.canvas = j2ds.$(_canvas);
   j2ds.scene.context = j2ds.scene.canvas.getContext('2d');
   j2ds.scene.width = j2ds.scene.canvas.width;
   j2ds.scene.height = j2ds.scene.canvas.height;
@@ -511,7 +544,7 @@ j2ds.scene.init = function (_canvas, _color) {
   j2ds.scene.canvas.style.zIndex = '1000';
 
   j2ds.scene.canvas.style.WebkitTransform = 'translate3d(0,0,0)';
-  j2ds.scene.canvas.style.WebkitTransform = 'tranlsateZ(0)';
+  j2ds.scene.canvas.style.WebkitTransform = 'translateZ(0)';
   j2ds.scene.canvas.style.WebkitTransform = 'scale3d(1,1,1)';
   j2ds.scene.canvas.style.WebkitTransform = 'scale3dZ(1)';
   j2ds.scene.canvas.style.transform = 'translate3d(0,0,0)';
@@ -527,7 +560,7 @@ j2ds.scene.init = function (_canvas, _color) {
   j2ds.scene.cancelClear = false;
 
   /* Вид "камеры" */
-  j2ds.scene.view = vec2df(0, 0);
+  j2ds.scene.view = j2ds.Math.vec2df(0, 0);
 };
 
 
@@ -550,14 +583,14 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
   o.resizeBox = function (_offset, _size) {
     this.box.offset = _offset;
     this.box.size = _size;
-  }
+  };
 
   o.setLayer = function (_layer) {
     this.layer = _layer ? j2ds.layers.layer(_layer) : j2ds.scene;
   };
 
   o.getLayer = function () {
-    return (this.layer);
+    return this.layer;
   };
 
   o.setVisible = function (_visible) {
@@ -565,24 +598,24 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
   };
 
   o.moveTo = function (_to, _d) {
-    _d = _d || vec2df(0, 0);
+    _d = _d || j2ds.Math.vec2df(0, 0);
     _to = _to.getPosition();
-    this.move(vec2df(
+    this.move(j2ds.Math.vec2df(
       ((_to.x - this.getPosition().x) / 5) + _d.x,
       ((_to.y - this.getPosition().y) / 5) + _d.y
     ));
   };
 
   o.setPosition = function (_pos) {
-    this.pos = vec2df(_pos.x - Math.ceil(this.size.x / 2), _pos.y - Math.ceil(this.size.y / 2));
+    this.pos = j2ds.Math.vec2df(_pos.x - Math.ceil(this.size.x / 2), _pos.y - Math.ceil(this.size.y / 2));
   };
 
   o.move = function (_pos) {
-    this.pos = vec2df(this.pos.x + _pos.x, this.pos.y + _pos.y);
+    this.pos = j2ds.Math.vec2df(this.pos.x + _pos.x, this.pos.y + _pos.y);
   };
 
   o.getPosition = function () {
-    return (vec2df(this.pos.x + Math.ceil(this.size.x / 2), this.pos.y + Math.ceil(this.size.y / 2)));
+    return j2ds.Math.vec2df(this.pos.x + Math.ceil(this.size.x / 2), this.pos.y + Math.ceil(this.size.y / 2));
   };
 
   o.setSize = function (_size) {
@@ -602,7 +635,7 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
   };
 
   o.getDistanceXY = function (_id) {
-    return vec2df(Math.abs(_id.getPosition().x - this.getPosition().x), Math.abs(_id.getPosition().y - this.getPosition().y));
+    return j2ds.Math.vec2df(Math.abs(_id.getPosition().x - this.getPosition().x), Math.abs(_id.getPosition().y - this.getPosition().y));
   };
 
   o.isIntersect = function (_id) {
@@ -620,15 +653,11 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
       y2: _id.size.y + _id.box.size.y
     };
 
-    return (
-      (
-        (pos.y1 + size.y1 >= pos.y2) &&
-        (pos.x1 + size.x1 >= pos.x2)
-      ) && (
-        (pos.x1 < pos.x2 + size.x2) &&
-        (pos.y1 < pos.y2 + size.y2)
-      )
-    );
+    return (pos.y1 + size.y1 >= pos.y2) &&
+      (pos.x1 + size.x1 >= pos.x2) &&
+      (pos.x1 < pos.x2 + size.x2) &&
+      (pos.y1 < pos.y2 + size.y2)
+    ;
   };
 
   o.isCollision = function (_id) {
@@ -639,7 +668,7 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
     ) {
       result = true;
     }
-    return (result);
+    return result;
   };
 
   o.isCollisionRadius = function (_id) {
@@ -650,7 +679,7 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
     ) {
       result = true;
     }
-    return (result);
+    return result;
   };
 
   o.isLookScene = function () {
@@ -661,7 +690,7 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
       this.pos.y + this.size.y < j2ds.scene.view.y)) {
       yes = false;
     }
-    return (yes);
+    return yes;
   };
 
   o.turn = function (_angle) {
@@ -702,7 +731,7 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
 
     o.all = (o.x || o.y);
 
-    return (o);
+    return o;
   };
 
   o.setRotationTo = function (_to) {
@@ -715,8 +744,8 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
   };
 
   o.moveDir = function (_speed) {
-    this.pos.x += _speed * (Math.cos(rad(this.angle)));
-    this.pos.y += _speed * (Math.sin(rad(this.angle)));
+    this.pos.x += _speed * (Math.cos(j2ds.Math.rad(this.angle)));
+    this.pos.y += _speed * (Math.sin(j2ds.Math.rad(this.angle)));
   };
 
   o.drawBox = function () {
@@ -738,14 +767,14 @@ j2ds.scene.addBaseNode = function (_pos, _size) {
     context.stroke();
   };
 
-  return (o);
-}
+  return o;
+};
 
 
 /* окружность */
 
 j2ds.scene.addCircleNode = function (_pos, _radius, _color) {
-  var o = j2ds.scene.addBaseNode(_pos, vec2df(_radius * 2, _radius * 2));
+  var o = j2ds.scene.addBaseNode(_pos, j2ds.Math.vec2df(_radius * 2, _radius * 2));
   /*Свойства*/
   o.color = _color;
   o.radius = _radius;
@@ -767,13 +796,13 @@ j2ds.scene.addCircleNode = function (_pos, _radius, _color) {
     }
   };
 
-  return (o);
-}
+  return o;
+};
 
 
 /* линии */
 j2ds.scene.addLineNode = function (_pos, _points, _scale, _color, _width, _fill, _cFill) {
-  var o = j2ds.scene.addBaseNode(_pos, vec2df(0, 0));
+  var o = j2ds.scene.addBaseNode(_pos, j2ds.Math.vec2df(0, 0));
 
   /*Свойства*/
   o.color = _color;
@@ -810,8 +839,8 @@ j2ds.scene.addLineNode = function (_pos, _points, _scale, _color, _width, _fill,
     }
   };
 
-  return (o);
-}
+  return o;
+};
 
 
 /*прямоугольники*/
@@ -828,7 +857,7 @@ j2ds.scene.addRectNode = function (_pos, _size, _color) {
       if (this.angle) {
         context.save();
         context.translate(this.getPosition().x - j2ds.scene.view.x, this.getPosition().y - j2ds.scene.view.y);
-        context.rotate(rad(this.angle));
+        context.rotate(j2ds.Math.rad(this.angle));
         context.translate(-(this.getPosition().x - j2ds.scene.view.x), -(this.getPosition().y - j2ds.scene.view.y));
       }
 
@@ -846,13 +875,13 @@ j2ds.scene.addRectNode = function (_pos, _size, _color) {
     }
   };
 
-  return (o);
-}
+  return o;
+};
 
 /* изображения */
 j2ds.scene.createImageMap = function (_id) {
   var o = {};
-  o.img = $(_id);
+  o.img = j2ds.$(_id);
   o.img.onload = function () {
     o.img.style.display = 'none';
   };
@@ -860,7 +889,7 @@ j2ds.scene.createImageMap = function (_id) {
 
   /* Функции */
   o.createAnimation = function (_sourceX, _sourceY, _sourceW, _sourceH, _frameCount) {
-    var o = {
+    return {
       imageMap: this,
       sourceX: _sourceX,
       sourceY: _sourceY,
@@ -868,12 +897,10 @@ j2ds.scene.createImageMap = function (_id) {
       sourceH: _sourceH,
       frameCount: _frameCount - 1
     };
+  };
 
-    return (o);
-  }
-
-  return (o);
-}
+  return o;
+};
 
 j2ds.scene.addSpriteNode = function (_pos, _size, _animation) {
 
@@ -906,10 +933,8 @@ j2ds.scene.addSpriteNode = function (_pos, _size, _animation) {
       else {
         this.tmpSpeed += 1;
       }
-
     }
-    ;
-  }
+  };
 
 // отрисовка одного кадра
   o.drawFrame = function (_frame) {
@@ -918,7 +943,7 @@ j2ds.scene.addSpriteNode = function (_pos, _size, _animation) {
       if (this.angle || this.flip.x || this.flip.y) {
         context.save();
         context.translate(this.getPosition().x - j2ds.scene.view.x, this.getPosition().y - j2ds.scene.view.y);
-        context.rotate(rad(this.angle));
+        context.rotate(j2ds.Math.rad(this.angle));
         context.scale(this.flip.x ? -1 : 1, this.flip.y ? -1 : 1);
         context.translate(-(this.getPosition().x - j2ds.scene.view.x), -(this.getPosition().y - j2ds.scene.view.y));
       }
@@ -944,8 +969,8 @@ j2ds.scene.addSpriteNode = function (_pos, _size, _animation) {
     }
   };
 
-  return (o);
-}
+  return o;
+};
 
 
 /*--------------- Локальное хранилище ----------------*/
@@ -954,10 +979,10 @@ j2ds.scene.addSpriteNode = function (_pos, _size, _animation) {
 j2ds.createLocal = function (_id) {
   var o = {};
   o.id = _id;
-  o.ls = window.localStorage ? window.localStorage : false;
+  o.ls = j2ds.window.localStorage ? j2ds.window.localStorage : false;
 
   if (!o.ls) {
-    alert('J2ds ERROR in "createLocal(' + _id + ')" \n' + 'Объект "localStorage" не поддерживается.');
+    throw new Error('J2ds ERROR in "createLocal(' + _id + ')" \n' + 'Объект "localStorage" не поддерживается.');
   }
   /*Свойства*/
 
@@ -971,35 +996,35 @@ j2ds.createLocal = function (_id) {
 
   o.load = function (_name) {
     if (!this.ls) {
-      return (false);
+      return false;
     }
     var o = {};
     o.val = this.ls.getItem(this.id + _name);
     o.int = parseInt(o.val);
     o.dbl = parseFloat(o.val);
-    return (o);
+    return o;
   };
 
   o.is = function (_name) {
     if (!this.ls) {
-      return (false);
+      return false;
     }
     return !!(this.ls.getItem(this.id + _name));
-  }
+  };
 
   o.saveObject = function (_name, _value) {
     if (!this.ls) {
-      return (false);
+      return false;
     }
     this.ls.setItem(this.id + _name, _value);
-  }
+  };
 
   o.loadObject = function (_name) {
     if (!this.ls) {
-      return (false);
+      return false;
     }
     return JSON.parse(this.ls.getItem(this.id + _name));
-  }
+  };
 
-  return (o);
-}
+  return o;
+};
