@@ -64,10 +64,10 @@ var createMap= function (map, tiles) {
    }
    else if (map.map[i][j] == 'D') { 
     // дерево
-    var rnd= Random(2, 4);
+    var rnd= random(2, 4);
     o= scene.addSpriteNode(vec2df(j*map.x, i*map.y+map.y-tiles.derevo.sourceH*rnd), vec2df(tiles.derevo.sourceW*rnd, tiles.derevo.sourceH*rnd), tiles.derevo);
     o.type= 'none';
-    if (Random(0, 3) == 2) o.setLayer('front');
+    if (random(0, 3) == 2) o.setLayer('front');
    }
    else if (map.map[i][j] == 'M') { 
     // позиция главного персонажа
@@ -229,8 +229,8 @@ var keyMe= function () {
  }
 
  if (input.isKeyPress('CTRL')) {
-  var dx= Random(3, 6),
-      dy= Random(3, 6);
+  var dx= random(3, 6),
+      dy= random(3, 6);
   if (score > 0) {
    if (me.to == 'right') {
      apple.dx= dx;

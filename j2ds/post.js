@@ -50,8 +50,8 @@ _PE_alphaBlur= function(_vol) {
  {
   if (this.blurFrames[i])
   {
-   var rX= Random(2,10);
-   var rY= Random(2,10);   
+   var rX= random(2,10);
+   var rY= random(2,10);
    scene.context.globalAlpha -= blurStep;
    scene.context.fillStyle = this.blurFrames[i];
    scene.context.fillRect(-rX, -rY, scene.width+rX*2, scene.height+rY*2);
@@ -159,7 +159,7 @@ _PE_setRotation= function(_angle) {
   
  scene.context.save();
 	scene.context.translate(scene.width/2, scene.height/2);
- scene.context.rotate(Rad(_angle));
+ scene.context.rotate(rad(_angle));
  scene.context.translate(-scene.width/2, -scene.height/2);
  
  scene.context.fillStyle = img;

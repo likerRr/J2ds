@@ -37,7 +37,7 @@ var fpsTest= function () {
    // Добавляем зеленый прямоугольник
    var o= scene.addRectNode(input.pos, vec2df(10, 10), 'green');
    // устанавливаем ему скорость смещения
-   o.dx= 6-Random(0, 12); o.dy= 6-Random(0, 12);
+   o.dx= 6-random(0, 12); o.dy= 6-random(0, 12);
    // пушим его в массив прямоугольников
    nodes.push(o);
    // увеличиваем счетчик прямоугольников (он равен nodes.length)
