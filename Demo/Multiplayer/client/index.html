@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <script src="../../../j2ds/j2ds.js"></script>
+</head>
+<body>
+<canvas id="multiplayer-demo" width="600" height="500"></canvas>
+<img src="./img/map.png" alt="map" id="map">
+
+<script>
+  var input= j2ds.input;
+  var scene= j2ds.scene;
+  var layers= j2ds.layers;
+  var app = {
+    imageMap: scene.createImageMap('#map'),
+    Math: j2ds.Math
+  };
+//  var tiles = createTiles(imageMap);
+
+  function Character(name) {
+    var charSpriteMap = {},
+      self = this;
+
+    self.width = 25;
+    self.height = 48;
+
+    charSpriteMap.fbi = {
+      walk: [0, 0, self.width, self.height, 3],
+      stand: [0, 0, self.width, self.height, 1]
+    };
+    charSpriteMap.traveler = {
+      walk: [0, 51, self.width, self.height, 3],
+      stand: [0, 51, self.width, self.height, 1]
+    };
+
+    if (charSpriteMap[name] === undefined) {
+      throw new Error('Incorrect character name');
+    }
+
+    self.indicator = false;
+    self.scene = null;
+    self.speed = 0;
+    self.framesMap = app.imageMap;
+    self.name = name;
+    self.animations = {
+      walk: self.framesMap.createAnimation.apply(self.framesMap, charSpriteMap[name].walk),
+      stand: self.framesMap.createAnimation.apply(self.framesMap, charSpriteMap[name].stand)
+    };
+  }
+
+  Character.prototype.indicate = function(isIndicate) {
+    this.indicator = !!isIndicate;
+
+    return this;
+  };
+
+  Character.prototype.attachTo = function(scene) {
+    this.scene = scene;
+
+    return this;
+  };
+
+  Character.prototype.spawn = function(position) {
+    this.node	= this.scene.addSpriteNode(position, app.Math.vec2df(this.width, this.height));
+
+    return this;
+  };
+
+  Character.prototype.setAnimation = function(animationName) {
+    this.node.setAnimation(this.animations[animationName]);
+
+    return this;
+  };
+
+  Character.prototype.stand = function() {
+    this.setAnimation('stand');
+  };
+
+  Character.prototype.walk = function(direction) {
+    this.setAnimation('walk');
+    this.speed = 5;
+
+    if (direction == '>') {
+      this.node.setFlip(0, 0);
+      this.node.move(app.Math.vec2df(this.speed, 0));
+    } else if (direction == '<') {
+      this.node.setFlip(1, 0);
+      this.node.move(app.Math.vec2df(-this.speed, 0));
+    } else if (direction == '^') {
+      this.node.move(app.Math.vec2df(0, -this.speed));
+    } else if (direction == 'v') {
+      this.node.move(app.Math.vec2df(0, this.speed));
+    }
+  };
+
+  Character.prototype.drawIndicator = function() {
+    var charPos = this.node.getPosition(),
+      radius = 2;
+
+    charPos.y = charPos.y + this.height / 2 + 2;
+    charPos.x = charPos.x - radius;
+    this.scene.addCircleNode(charPos, radius, 'green').draw();
+  };
+
+  Character.prototype.draw = function() {
+    this.node.draw(0.4);
+    if (this.indicator) {
+      this.drawIndicator();
+    }
+
+    return this;
+  };
+
+  var char1 = new Character('fbi');
+  char1
+    .attachTo(scene)
+    .spawn(app.Math.vec2df(0, 0))
+    .indicate(true);
+//  var char2 = new Character(scene, app.Math.vec2df(100, 50), 'traveler');
+
+  scene.init('#multiplayer-demo');
+  scene.start(StartGame, 30);
+
+  function StartGame() {
+    scene.clear();
+    scene.fill('#929292');
+
+    if (input.isKeyDown('RIGHT')) {
+      char1.walk('>');
+    }
+    if (input.isKeyDown('LEFT')) {
+      char1.walk('<');
+    }
+    if (input.isKeyDown('UP')) {
+      char1.walk('^');
+    }
+    if (input.isKeyDown('DOWN')) {
+      char1.walk('v');
+    }
+
+    if (!input.isKeyDown('RIGHT') && !input.isKeyDown('LEFT') && !input.isKeyDown('UP') && !input.isKeyDown('DOWN')) {
+      char1.stand();
+    }
+
+    char1.draw();
+
+    if (input.isKeyPress('F5')) {
+      location.reload();
+    }
+  }
+</script>
+</body>
+</html>
